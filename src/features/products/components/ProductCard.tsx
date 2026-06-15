@@ -3,6 +3,7 @@ import type { Product } from '@shared/types'
 import { formatPrice } from '@/lib/format'
 import { useCart } from '@/features/cart/useCart'
 import { Rating } from './Rating'
+import { HighlightedText } from './HighlightedText'
 import styles from './ProductCard.module.css'
 
 /**
@@ -18,9 +19,15 @@ interface ProductCardProps {
    * rest. The grid passes `priority` for the first N cards.
    */
   priority?: boolean
+  /** Active search term — highlights the matching substring in the title. */
+  highlightQuery?: string
 }
 
-export function ProductCard({ product, priority = false }: ProductCardProps): ReactNode {
+export function ProductCard({
+  product,
+  priority = false,
+  highlightQuery = '',
+}: ProductCardProps): ReactNode {
   const { addProduct } = useCart()
 
   return (
@@ -39,7 +46,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps): Re
       </div>
       <div className={styles.body}>
         <h2 className={styles.title} title={product.title}>
-          {product.title}
+          <HighlightedText text={product.title} query={highlightQuery} />
         </h2>
         <Rating rating={product.rating} />
         <div className={styles.footer}>

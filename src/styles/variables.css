@@ -15,6 +15,9 @@
   --color-focus-ring: #1565c0;
   --color-star: #f5a623;
   --color-skeleton-highlight: #eceef1;
+  /* Search-match highlight (AA contrast for dark text on this background). */
+  --color-mark-bg: #fff3b0;
+  --color-mark-text: #1a1a1a;
 
   /* Feedback (error banner — AA contrast on light surface) */
   --color-error: #c62828;

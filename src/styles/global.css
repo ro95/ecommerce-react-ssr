@@ -47,6 +47,13 @@ a {
   color: var(--color-accent);
 }
 
+/* Search-match highlight emitted by <HighlightedText>. */
+mark {
+  background-color: var(--color-mark-bg);
+  color: var(--color-mark-text);
+  border-radius: 2px;
+}
+
 /* Visible focus for keyboard users; never remove the outline outright. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);

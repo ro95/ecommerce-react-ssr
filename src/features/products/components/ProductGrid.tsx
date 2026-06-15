@@ -11,14 +11,20 @@ const SKELETON_COUNT = 8
 
 interface ProductGridProps {
   products: Product[]
+  /** Active search term forwarded to cards for title highlighting. */
+  highlightQuery?: string
 }
 
-export function ProductGrid({ products }: ProductGridProps): ReactNode {
+export function ProductGrid({ products, highlightQuery = '' }: ProductGridProps): ReactNode {
   return (
     <ul className={styles.grid}>
       {products.map((product, index) => (
         <li key={product.id} className={styles.cell}>
-          <ProductCard product={product} priority={index < PRIORITY_CARD_COUNT} />
+          <ProductCard
+            product={product}
+            priority={index < PRIORITY_CARD_COUNT}
+            highlightQuery={highlightQuery}
+          />
         </li>
       ))}
     </ul>
