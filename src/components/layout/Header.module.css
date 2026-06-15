@@ -8,8 +8,9 @@
   gap: var(--space-4);
   height: var(--header-height);
   padding-inline: var(--space-4);
-  background-color: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-brand);
+  color: var(--color-brand-contrast);
+  box-shadow: var(--shadow-header);
 }
 
 .inner {
@@ -25,30 +26,42 @@
 .brand {
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: var(--color-text);
+  letter-spacing: -0.02em;
+  color: var(--color-brand-contrast);
   text-decoration: none;
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .navLink {
-  color: var(--color-text);
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
+  font-weight: 500;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .navLink:hover {
-  background-color: var(--color-surface);
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--color-brand-contrast);
 }
 
 .navLinkActive {
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-brand-contrast);
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* The global focus ring is brand-blue, invisible on the blue header — use white. */
+.brand:focus-visible,
+.navLink:focus-visible {
+  outline: 2px solid var(--color-brand-contrast);
+  outline-offset: 2px;
 }
 
 /* Reserve a fixed-size box for the cart count badge so it cannot cause layout

@@ -20,7 +20,7 @@ export function Header(): ReactNode {
     <header className={styles.header}>
       <div className={styles.inner}>
         <NavLink to="/" className={styles.brand}>
-          E-shop Gallery
+          Carrefour
         </NavLink>
         <nav className={styles.nav} aria-label="Primary">
           <NavLink to="/" end className={navLinkClassName}>

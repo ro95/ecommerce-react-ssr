@@ -3,26 +3,40 @@
  * No magic values in components: reference these custom properties instead.
  */
 :root {
+  /* Brand — official Carrefour palette (a nod to the French tricolore) */
+  --color-brand: #004a97; /* Carrefour blue — Pantone 286 C */
+  --color-brand-dark: #003a78;
+  --color-brand-contrast: #ffffff;
+  --color-cta: #e3000f; /* Carrefour red — Pantone 485 C */
+  --color-cta-hover: #c2000c;
+  --color-cta-contrast: #ffffff;
+
   /* Color */
   --color-bg: #ffffff;
-  --color-surface: #f7f7f8;
-  --color-text: #1a1a1a;
-  --color-text-muted: #5c5f66;
-  --color-border: #e2e4e9;
-  --color-accent: #1565c0;
-  --color-accent-hover: #0d47a1;
+  --color-surface: #f2f6fb; /* soft blue-grey */
+  --color-text: #14181f;
+  --color-text-muted: #5b6470;
+  --color-border: #e4e8ef;
+  /* Accent = brand blue: links, active nav, focus on light backgrounds. */
+  --color-accent: #004a97;
+  --color-accent-hover: #003a78;
   --color-accent-contrast: #ffffff;
-  --color-focus-ring: #1565c0;
+  --color-focus-ring: #004a97;
   --color-star: #f5a623;
-  --color-skeleton-highlight: #eceef1;
+  --color-skeleton-highlight: #eaf0f8;
   /* Search-match highlight (AA contrast for dark text on this background). */
-  --color-mark-bg: #fff3b0;
-  --color-mark-text: #1a1a1a;
+  --color-mark-bg: #ffe08a;
+  --color-mark-text: #14181f;
 
   /* Feedback (error banner — AA contrast on light surface) */
   --color-error: #c62828;
   --color-error-text: #8c1d18;
   --color-error-surface: #fdecea;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(20, 24, 31, 0.06), 0 2px 6px rgba(20, 24, 31, 0.06);
+  --shadow-md: 0 6px 16px rgba(20, 24, 31, 0.1), 0 2px 6px rgba(20, 24, 31, 0.06);
+  --shadow-header: 0 2px 10px rgba(0, 74, 151, 0.18);
 
   /* Spacing scale (4px base) */
   --space-1: 0.25rem;
@@ -34,11 +48,11 @@
 
   /* Typography */
   --font-sans:
-    system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
-  --font-size-xl: 1.75rem;
+  --font-size-xl: 1.875rem;
   --line-height-base: 1.5;
 
   /* Layout */
@@ -46,8 +60,10 @@
   --header-height: 4rem;
 
   /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
 
   /* Z-index scale */
   --z-header: 100;

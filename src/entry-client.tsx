@@ -5,6 +5,12 @@ import type { DehydratedState } from '@tanstack/react-query'
 import { App } from '@/App'
 import { getClientQueryClient } from '@/app/queryClient'
 import { reportWebVitals } from '@/lib/reportWebVitals'
+// Self-hosted Poppins (CSP-safe: font-src 'self'). Brand-aligned, modern sans —
+// a free stand-in for the proprietary Carrefour Sans.
+import '@fontsource/poppins/latin-400.css'
+import '@fontsource/poppins/latin-500.css'
+import '@fontsource/poppins/latin-600.css'
+import '@fontsource/poppins/latin-700.css'
 import './styles/global.css'
 
 const rootElement = document.getElementById('root')
