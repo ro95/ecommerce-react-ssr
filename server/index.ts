@@ -21,6 +21,14 @@ import type { Express, Request, Response, NextFunction } from 'express'
 import type { ViteDevServer } from 'vite'
 import { renderToResponse } from './ssr.ts'
 import type { RenderFn } from './ssr.ts'
+import { createBffRouter } from './bff/router.ts'
+import { securityHeaders } from './security.ts'
+
+/** `${protocol}://${host}` for the current request — forwarded to the renderer
+ * so server-side data fetching can build absolute URLs to our own BFF. */
+function originOf(req: Request): string {
+  return `${req.protocol}://${req.get('host') ?? 'localhost'}`
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -78,8 +86,9 @@ function createDevHandler(vite: ViteDevServer) {
         const mod = await vite.ssrLoadModule(SSR_ENTRY_DEV)
         const render = (mod as { render: RenderFn }).render
 
-        renderToResponse({
+        await renderToResponse({
           url,
+          origin: originOf(req),
           template,
           render,
           res,
@@ -103,13 +112,18 @@ function createDevHandler(vite: ViteDevServer) {
  * per-request handler only does the streaming work.
  */
 function createProdHandler(template: string, render: RenderFn) {
+  // `renderToResponse` is async (the render itself is awaited), so we run it in a
+  // self-contained task and funnel any rejection to `next` — mirroring the dev
+  // handler and avoiding an unhandled promise at the middleware boundary.
   return (req: Request, res: Response, next: NextFunction): void => {
     const url = req.originalUrl.replace(BASE, '/')
-    try {
-      renderToResponse({ url, template, render, res })
-    } catch (error) {
-      next(error)
-    }
+    void (async () => {
+      try {
+        await renderToResponse({ url, origin: originOf(req), template, render, res })
+      } catch (error) {
+        next(error)
+      }
+    })()
   }
 }
 
@@ -119,6 +133,41 @@ async function createServer(): Promise<Express> {
   // ETag so partial responses aren't cached/compared as full documents.
   app.disable('x-powered-by')
   app.disable('etag')
+
+  // Security headers first so EVERY response (BFF, assets, SSR) inherits them.
+  // No-op in dev (Vite HMR needs inline/eval); enforced in prod. See ./security.ts.
+  app.use(securityHeaders(isProduction))
+
+  // BFF mounted on /api BEFORE any mode-specific middleware (Vite in dev, static
+  // in prod) and before the SSR catch-all, so /api never falls through to module
+  // transforms or HTML rendering. `express.json()` is scoped to /api so SSR and
+  // asset requests aren't needlessly body-parsed. The BFF is fully independent of
+  // the React render — it works even if SSR is mid-migration.
+  app.use('/api', express.json({ limit: '64kb' }), createBffRouter())
+  // BFF-scoped error boundary: a malformed JSON body makes `express.json()` throw
+  // a SyntaxError. Catch it HERE so /api always answers JSON (400), instead of
+  // falling through to the SSR/HTML 500 boundary below. A payload over the limit
+  // surfaces as 413. Anything else is an opaque 500 (no internals leaked).
+  app.use(
+    '/api',
+    (error: unknown, _req: Request, res: Response, next: NextFunction): void => {
+      if (res.headersSent) {
+        next(error)
+        return
+      }
+      const status = (error as { status?: number; type?: string } | null)?.status
+      if (error instanceof SyntaxError || status === 400) {
+        res.status(400).json({ error: 'bad_request', message: 'Malformed JSON body' })
+        return
+      }
+      if (status === 413) {
+        res.status(413).json({ error: 'payload_too_large', message: 'Payload too large' })
+        return
+      }
+      console.error('[bff] middleware error:', error)
+      res.status(500).json({ error: 'internal_error', message: 'Internal Server Error' })
+    },
+  )
 
   let ssrHandler: (req: Request, res: Response, next: NextFunction) => void
 
