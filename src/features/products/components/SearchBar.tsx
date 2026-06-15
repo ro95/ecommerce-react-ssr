@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useDebouncedCallback } from '@/lib/useDebouncedCallback'
 import styles from './SearchBar.module.css'
 
@@ -21,6 +21,14 @@ interface SearchBarProps {
 export function SearchBar({ initialQuery, onQueryChange }: SearchBarProps): ReactNode {
   const [value, setValue] = useState(initialQuery)
   const debouncedCommit = useDebouncedCallback(onQueryChange, URL_DEBOUNCE_MS)
+
+  // Keep the input in sync when the committed term changes EXTERNALLY — the
+  // "Clear filters" reset or browser back/forward. While typing this is a no-op:
+  // the debounced commit makes `initialQuery` equal the current value, so the
+  // input never fights the user's keystrokes.
+  useEffect(() => {
+    setValue(initialQuery)
+  }, [initialQuery])
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     const next = event.target.value

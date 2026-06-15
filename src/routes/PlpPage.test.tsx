@@ -162,5 +162,8 @@ describe('PlpPage — URL is the source of truth on first render (SSR-parity)', 
 
     await user.click(screen.getByRole('button', { name: /clear filters/i }))
     expect(within(document.body).getAllByRole('heading', { level: 2 }).length).toBe(3)
+    // The input must follow the external URL change (reset), not keep the stale
+    // term — regression guard for the SearchBar/URL desync.
+    expect(screen.getByRole('searchbox', { name: /search products/i })).toHaveValue('')
   })
 })
