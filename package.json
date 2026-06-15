@@ -28,6 +28,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.1.0",
+    "web-vitals": "^4.2.4",
     "xstate": "^5.19.0",
     "zod": "^3.24.0",
     "zustand": "^5.0.0"
@@ -52,6 +53,7 @@
     "eslint-plugin-react-refresh": "^0.4.0",
     "jsdom": "^25.0.0",
     "prettier": "^3.4.0",
+    "rollup-plugin-visualizer": "^5.14.0",
     "sirv": "^3.0.0",
     "supertest": "^7.0.0",
     "typescript": "^5.7.0",
