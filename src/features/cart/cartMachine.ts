@@ -94,11 +94,12 @@ export const cartMachine = setup({
           items: ({ context, event }) => applyMutation(context.items, event.mutation),
           error: null,
         }),
+        // Commit the items the preceding `assign` already computed. Re-deriving
+        // with applyMutation here would apply the mutation twice (the assign has
+        // updated context.items by the time these params are read in XState v5).
         {
           type: 'commitItems',
-          params: ({ context, event }) => ({
-            items: applyMutation(context.items, event.mutation),
-          }),
+          params: ({ context }) => ({ items: context.items }),
         },
       ],
     },
