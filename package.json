@@ -7,7 +7,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "NODE_ENV=development node --watch server/index.ts",
+    "dev": "NODE_ENV=development node --watch-path=./server --watch-path=./shared server/index.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build --outDir dist/client --ssrManifest",
     "build:server": "vite build --outDir dist/server --ssr src/entry-server.tsx",
