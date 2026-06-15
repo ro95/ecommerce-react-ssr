@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router'
+import { CartBadge } from '@/features/cart/components/CartBadge'
 import styles from './Header.module.css'
 
 function navLinkClassName({ isActive }: { isActive: boolean }): string {
@@ -27,9 +28,11 @@ export function Header(): ReactNode {
           </NavLink>
           <NavLink to="/cart" className={navLinkClassName}>
             Cart
+            {/* Reserved fixed-size slot → revealing the badge causes no CLS. */}
+            <span className={styles.cartSlot}>
+              <CartBadge />
+            </span>
           </NavLink>
-          {/* Phase 2: cart item-count badge mounts here (client component). */}
-          <span className={styles.cartSlot} aria-hidden="true" />
         </nav>
       </div>
     </header>

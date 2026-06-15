@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
+import type { DehydratedState } from '@tanstack/react-query'
 import { App } from '@/App'
 import { getClientQueryClient } from '@/app/queryClient'
 import './styles/global.css'
@@ -12,18 +13,34 @@ if (!rootElement) {
 }
 
 /**
- * Client entrypoint: hydrate the server-rendered HTML in place.
- *
- * We reuse the SAME `App` tree as the server (BrowserRouter injected here vs
- * StaticRouter on the server) so markup matches and hydration produces no
- * mismatch.
- *
- * Phase 2: read the server-serialized dehydrated query state from the document
- * (e.g. `window.__REACT_QUERY_STATE__`) and pass it as `dehydratedState`.
+ * Read the server-serialized dehydrated query cache from the non-executable
+ * `<script type="application/json">` injected by the server. `JSON.parse` of a
+ * data-only script is safe; we keep it in a try/catch so a malformed payload
+ * degrades to a normal client fetch instead of crashing hydration.
+ */
+function readDehydratedState(): DehydratedState | undefined {
+  const raw = document.getElementById('__RQ_STATE__')?.textContent
+  if (!raw) return undefined
+  try {
+    return JSON.parse(raw) as DehydratedState
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Client entrypoint: hydrate the server-rendered HTML in place, reusing the
+ * SAME `App` tree as the server (BrowserRouter vs StaticRouter) so markup
+ * matches. The dehydrated cache means the PLP has its data immediately — zero
+ * refetch, zero mismatch on first paint.
  */
 hydrateRoot(
   rootElement,
   <StrictMode>
-    <App queryClient={getClientQueryClient()} router={BrowserRouter} />
+    <App
+      queryClient={getClientQueryClient()}
+      router={BrowserRouter}
+      dehydratedState={readDehydratedState()}
+    />
   </StrictMode>,
 )

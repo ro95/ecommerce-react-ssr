@@ -1,0 +1,23 @@
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.stars {
+  display: inline-flex;
+  letter-spacing: 1px;
+}
+
+.starFilled {
+  color: var(--color-star);
+}
+
+.starEmpty {
+  color: var(--color-border);
+}
+
+.count {
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,23 @@
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-4);
+  /* Auto-fill responsive columns: ~4 at 1440, ~2-3 at 768, 1 at 375. */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.cell {
+  display: flex;
+}
+
+.cell > * {
+  width: 100%;
+}
+
+@media (max-width: 375px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
