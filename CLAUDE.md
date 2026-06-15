@@ -38,14 +38,14 @@ Back (serveur SSR + BFF maison, pas une API métier) :
 - Preview prod : `npm run preview` (serveur SSR en mode prod)
 - Lint : `npm run lint`
 - Typecheck : `npm run typecheck` (`tsc --noEmit`)
-- Tests : `npm run test` (Vitest)
-- E2E : `npm run test:e2e` (Playwright)
-- Bundle analysis : `npm run analyze` (bonus)
+- Tests : `npm run test` (Vitest, projets node + jsdom)
+- Couverture : `npm run test:coverage`
+- Bundle analysis : `npm run analyze` (treemap)
 
 ## 4. Tests et formulaires
 
 - Runner : **Vitest**.
-- Outillage front : **Testing Library + user-event** (unit/intégration), **Playwright** (E2E).
+- Outillage front : **Testing Library + user-event** (unit/intégration). Pas d'E2E navigateur (les parcours sont couverts en intégration).
 - Outillage back : **Vitest + supertest** sur le serveur SSR / BFF.
 - Lib de formulaire : **natif** (recherche/filtres uniquement, pas de gros formulaire).
 - Validation : **Zod** (valider les réponses de l'API FakeStore côté BFF).
