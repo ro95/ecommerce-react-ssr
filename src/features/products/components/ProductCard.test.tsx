@@ -117,4 +117,25 @@ describe('ProductCard + CartBadge — add to cart updates the badge', () => {
     await user.click(screen.getByRole('button', { name: /Add to cart/ }))
     expect(await screen.findByLabelText(/items in cart/)).toHaveTextContent('2')
   })
+
+  // Regression guard for the lost-add bug: each ProductCard mounts its own cart
+  // machine, so adding from a SECOND card must extend the cart (read the live
+  // store), not overwrite it from a stale per-instance context.
+  it('adding from two different cards accumulates instead of resetting to 1', async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <CartBadge />
+        <ProductCard product={makeProduct({ id: 1, title: 'Backpack' })} />
+        <ProductCard product={makeProduct({ id: 2, title: 'Watch' })} />
+      </>,
+    )
+
+    await user.click(screen.getByRole('button', { name: /Add to cart Backpack/ }))
+    expect(await screen.findByLabelText(/items in cart/)).toHaveTextContent('1')
+
+    // Different card, different machine instance — the count must reach 2, not reset.
+    await user.click(screen.getByRole('button', { name: /Add to cart Watch/ }))
+    expect(await screen.findByLabelText(/items in cart/)).toHaveTextContent('2')
+  })
 })

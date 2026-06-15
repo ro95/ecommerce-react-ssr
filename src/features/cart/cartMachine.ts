@@ -34,7 +34,10 @@ export interface CartMachineContext {
 }
 
 export type CartMachineEvent =
-  | { type: 'MUTATE'; mutation: CartMutation }
+  // `baseItems` carries the LIVE store items captured at dispatch time. The
+  // optimistic update is computed from them, never from the machine's own
+  // context — see the MUTATE handler for why this matters.
+  | { type: 'MUTATE'; mutation: CartMutation; baseItems: CartItem[] }
   | { type: 'RETRY' }
   | { type: 'DISMISS' }
 
@@ -83,15 +86,20 @@ export const cartMachine = setup({
   initial: 'idle',
   // A MUTATE is accepted in every state so the UI never blocks: rapid clicks
   // (or a click while a previous sync is in flight) re-snapshot, commit the new
-  // optimistic items, and (re)enter `syncing`. The snapshot captured is the
-  // last successfully-committed items, so a later failure rolls back coherently.
+  // optimistic items, and (re)enter `syncing`.
   on: {
     MUTATE: {
       target: '.syncing',
       actions: [
         assign({
-          snapshot: ({ context }) => context.items,
-          items: ({ context, event }) => applyMutation(context.items, event.mutation),
+          // Base the optimistic update on the items carried by the event — the
+          // LIVE store items captured at dispatch — NOT the machine's own
+          // context. Each component mounts its own machine instance, so a
+          // context-based base would be a stale per-instance copy: adding from a
+          // second card (or after localStorage rehydration) would overwrite the
+          // cart instead of extending it. The store is the single source of truth.
+          snapshot: ({ event }) => event.baseItems,
+          items: ({ event }) => applyMutation(event.baseItems, event.mutation),
           error: null,
         }),
         // Commit the items the preceding `assign` already computed. Re-deriving

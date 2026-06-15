@@ -50,7 +50,11 @@ export function useCart(): UseCartResult {
 
   const dispatch = useCallback(
     (mutation: CartMutation) => {
-      send({ type: 'MUTATE', mutation })
+      // Read the LIVE store items at dispatch time (getState, not a render-time
+      // snapshot) so every mutation builds on the current cart — across cards and
+      // after rehydration — instead of this machine instance's stale context.
+      const baseItems = useCartStore.getState().items
+      send({ type: 'MUTATE', mutation, baseItems })
     },
     [send],
   )
