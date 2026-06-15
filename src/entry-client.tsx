@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router'
 import type { DehydratedState } from '@tanstack/react-query'
 import { App } from '@/App'
 import { getClientQueryClient } from '@/app/queryClient'
+import { reportWebVitals } from '@/lib/reportWebVitals'
 import './styles/global.css'
 
 const rootElement = document.getElementById('root')
@@ -44,3 +45,8 @@ hydrateRoot(
     />
   </StrictMode>,
 )
+
+// Core Web Vitals reporting — client-only, after hydration so measurement does
+// not compete with the critical hydration work. Logs to console in dev; the
+// reporter exposes a beacon extension point for a future telemetry endpoint.
+reportWebVitals()
