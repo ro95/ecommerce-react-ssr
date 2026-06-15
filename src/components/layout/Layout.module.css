@@ -1,0 +1,24 @@
+/* Visually hidden until focused — keyboard users can skip straight to content. */
+.skipLink {
+  position: absolute;
+  left: var(--space-2);
+  top: -3rem;
+  z-index: var(--z-skip-link);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skipLink:focus {
+  top: var(--space-2);
+}
+
+.main {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4);
+}
