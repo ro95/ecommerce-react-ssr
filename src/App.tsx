@@ -3,6 +3,7 @@ import { QueryClient } from '@tanstack/react-query'
 import type { DehydratedState } from '@tanstack/react-query'
 import { Providers } from '@/app/providers'
 import { AppRoutes } from '@/app/router'
+import { CartProvider } from '@/features/cart/CartProvider'
 
 interface AppProps {
   /** QueryClient: per-request on the server, singleton on the client. */
@@ -26,9 +27,11 @@ interface AppProps {
 export function App({ queryClient, router: Router, dehydratedState }: AppProps): ReactNode {
   return (
     <Providers client={queryClient} dehydratedState={dehydratedState}>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <CartProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </CartProvider>
     </Providers>
   )
 }

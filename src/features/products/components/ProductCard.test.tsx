@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import type { ReactElement, ReactNode } from 'react'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { Product } from '@shared/types'
@@ -30,7 +31,14 @@ const { storageMock } = vi.hoisted(() => {
 
 const { ProductCard } = await import('./ProductCard')
 const { CartBadge } = await import('@/features/cart/components/CartBadge')
+const { CartSyncStatus } = await import('@/features/cart/components/CartSyncStatus')
+const { CartProvider } = await import('@/features/cart/CartProvider')
 const { useCartStore } = await import('@/features/cart/store')
+
+/** useCart requires the shared cart machine — wrap every render in the provider. */
+function withCart(ui: ReactNode): ReactElement {
+  return <CartProvider>{ui}</CartProvider>
+}
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -63,7 +71,7 @@ afterEach(() => {
 
 describe('ProductCard — accessible presentation', () => {
   it('renders the product image, name, price and an accessible rating', () => {
-    render(<ProductCard product={makeProduct()} />)
+    render(withCart(<ProductCard product={makeProduct()} />))
 
     const img = screen.getByRole('img', { name: 'Fjallraven Backpack' })
     expect(img).toHaveAttribute('src', 'https://example.com/img.jpg')
@@ -79,13 +87,13 @@ describe('ProductCard — accessible presentation', () => {
   })
 
   it('lazy-loads by default and eager-loads when priority is set (LCP hint)', () => {
-    const { rerender } = render(<ProductCard product={makeProduct()} />)
+    const { rerender } = render(withCart(<ProductCard product={makeProduct()} />))
     expect(screen.getByRole('img', { name: 'Fjallraven Backpack' })).toHaveAttribute(
       'loading',
       'lazy',
     )
 
-    rerender(<ProductCard product={makeProduct()} priority />)
+    rerender(withCart(<ProductCard product={makeProduct()} priority />))
     expect(screen.getByRole('img', { name: 'Fjallraven Backpack' })).toHaveAttribute(
       'loading',
       'eager',
@@ -97,10 +105,12 @@ describe('ProductCard + CartBadge — add to cart updates the badge', () => {
   it('clicking "Add to cart" reveals the badge and keeps incrementing it', async () => {
     const user = userEvent.setup()
     render(
-      <>
-        <CartBadge />
-        <ProductCard product={makeProduct({ id: 1 })} />
-      </>,
+      withCart(
+        <>
+          <CartBadge />
+          <ProductCard product={makeProduct({ id: 1 })} />
+        </>,
+      ),
     )
 
     // Empty cart → the badge renders nothing (and reserves no visible count).
@@ -118,17 +128,18 @@ describe('ProductCard + CartBadge — add to cart updates the badge', () => {
     expect(await screen.findByLabelText(/items in cart/)).toHaveTextContent('2')
   })
 
-  // Regression guard for the lost-add bug: each ProductCard mounts its own cart
-  // machine, so adding from a SECOND card must extend the cart (read the live
-  // store), not overwrite it from a stale per-instance context.
+  // Regression guard for the lost-add bug: adding from a SECOND card must extend
+  // the cart (built from the live store via the shared machine), not overwrite it.
   it('adding from two different cards accumulates instead of resetting to 1', async () => {
     const user = userEvent.setup()
     render(
-      <>
-        <CartBadge />
-        <ProductCard product={makeProduct({ id: 1, title: 'Backpack' })} />
-        <ProductCard product={makeProduct({ id: 2, title: 'Watch' })} />
-      </>,
+      withCart(
+        <>
+          <CartBadge />
+          <ProductCard product={makeProduct({ id: 1, title: 'Backpack' })} />
+          <ProductCard product={makeProduct({ id: 2, title: 'Watch' })} />
+        </>,
+      ),
     )
 
     await user.click(screen.getByRole('button', { name: /Add to cart Backpack/ }))
@@ -137,5 +148,33 @@ describe('ProductCard + CartBadge — add to cart updates the badge', () => {
     // Different card, different machine instance — the count must reach 2, not reset.
     await user.click(screen.getByRole('button', { name: /Add to cart Watch/ }))
     expect(await screen.findByLabelText(/items in cart/)).toHaveTextContent('2')
+  })
+})
+
+describe('CartSyncStatus — global sync error surface', () => {
+  // The whole point of the shared cart machine: an add-to-cart failure triggered
+  // from the PLP must be visible (rolled back AND announced), not silent.
+  it('a failed add rolls back and surfaces a global alert', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' }),
+    )
+    render(
+      withCart(
+        <>
+          <CartSyncStatus />
+          <CartBadge />
+          <ProductCard product={makeProduct({ id: 1 })} />
+        </>,
+      ),
+    )
+
+    await user.click(screen.getByRole('button', { name: /Add to cart/ }))
+
+    // Sync fails → a global alert appears and the optimistic add is rolled back.
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(/Cart sync failed/)
+    expect(screen.queryByLabelText(/items in cart/)).not.toBeInTheDocument()
   })
 })

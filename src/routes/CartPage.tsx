@@ -17,17 +17,8 @@ import styles from './CartPage.module.css'
  */
 export function CartPage(): ReactNode {
   const hydrated = useHydrateCart()
-  const {
-    items,
-    totals,
-    error,
-    isSyncing,
-    addProduct,
-    setProductQuantity,
-    removeProduct,
-    retry,
-    dismissError,
-  } = useCart()
+  const { items, totals, isSyncing, addProduct, setProductQuantity, removeProduct } =
+    useCart()
 
   return (
     <section className={styles.page} aria-labelledby="cart-title" aria-busy={isSyncing}>
@@ -35,19 +26,7 @@ export function CartPage(): ReactNode {
         Cart
       </h1>
 
-      {error ? (
-        <div role="alert" className={styles.errorBanner}>
-          <span>{error}</span>
-          <span className={styles.errorActions}>
-            <button type="button" className={styles.linkButton} onClick={retry}>
-              Retry
-            </button>
-            <button type="button" className={styles.linkButton} onClick={dismissError}>
-              Dismiss
-            </button>
-          </span>
-        </div>
-      ) : null}
+      {/* Sync errors are surfaced globally by CartSyncStatus (in the Layout). */}
 
       {!hydrated ? (
         <p className={styles.message} aria-live="polite">
