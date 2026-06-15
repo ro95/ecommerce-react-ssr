@@ -246,10 +246,10 @@ describe('BFF router', () => {
       expect(body.issues.length).toBeGreaterThan(0)
     })
 
-    it('returns 400 for an empty items array (min 1)', async () => {
+    it('accepts an empty cart (removing the last item is a valid sync)', async () => {
       const { app } = await buildApp({})
       const res = await request(app).post('/api/cart').send({ items: [] })
-      expect(res.status).toBe(400)
+      expect(res.status).toBe(201)
     })
 
     it('returns 400 for a malformed JSON body without crashing', async () => {
