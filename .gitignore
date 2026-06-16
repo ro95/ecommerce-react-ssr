@@ -23,3 +23,6 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# internal docs (not published)
+docs/DECISIONS-TECHNIQUES.md
