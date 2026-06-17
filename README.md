@@ -6,8 +6,9 @@ the kata constraints. The emphasis is on rendering strategy, performance,
 type-safety and an architecture that scales — not on feature count.
 
 > Functional requirements live in [Instruction.md](Instruction.md).
-> The full rationale behind every choice (with the problems encountered) is in
-> [docs/DECISIONS-TECHNIQUES.md](docs/DECISIONS-TECHNIQUES.md) — Q&A format.
+> The rationale behind each choice (and the trade-offs) is documented inline in
+> the sections below — see **Architecture**, **Performance strategy** and
+> **Production considerations**.
 
 ---
 
@@ -165,6 +166,22 @@ directly.
 
 ---
 
+## Responsive & Accessibility
+
+**Responsive.** Mobile-first CSS Modules with breakpoints at **768px** and
+**375px** (plus a `prefers-reduced-motion` opt-out for animations). Layout
+manually verified at **1440 / 768 / 375** — the product grid reflows from
+multi-column to single-column and the header/cart stay usable on small screens.
+This responsive check is **not automated** (no visual-diff tool in this kata).
+
+**Accessibility.** Semantic landmarks, a **skip-to-content** link, keyboard-
+operable controls (quantity stepper, nav, cart actions), `aria-label`s and
+roles on interactive/stateful elements, an accessible product **rating**
+(text alternative, not color-only), and the cart sync status announced via a
+live region so failures are not visual-only.
+
+---
+
 ## Testing
 
 `npm test` runs a Vitest **workspace** with two environments:
@@ -209,7 +226,6 @@ user flows are covered by Testing Library integration tests.
 
 Built in reviewable phases with a clean, atomic commit history (foundations →
 SSR skeleton → MVP → tests → performance → refactor → features). Several real
-bugs were found and fixed along the way (dev-server watch loop, optimistic
-double-apply, empty-cart 400, a stale-context lost-add race, a leaking global
-PostCSS config) — each is documented with its cause and fix in
-[docs/DECISIONS-TECHNIQUES.md](docs/DECISIONS-TECHNIQUES.md) §9.
+bugs were found and fixed along the way — a dev-server watch loop, an optimistic
+double-apply, an empty-cart 400, a stale-context lost-add race, and a leaking
+global PostCSS config — each caught by a regression test in the suite.
